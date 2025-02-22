@@ -6,9 +6,45 @@ const authRoutes = require("./routes/authRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
 const doctorPersonRoutes = require("./routes/doctorAppointmentroute");
 const Doctorsreal = require("./dbSchema/doctorSchema");
-
 const checkmedicine = require("./routes/checkmedicine");
 
+// Load environment variables
+dotenv.config();
+
+// Initialize Express app
+const app = express();
+
+// CORS configuration with dynamic origins from .env
+const corsOptions = {
+  origin: [
+    process.env.FRONTEND_URL || "http://localhost:5181",
+    "http://localhost:3000" // Optional secondary URL
+  ],
+  credentials: true, // Enable if you need to send cookies
+  optionsSuccessStatus: 200
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.use(express.json());
+
+// MongoDB connection with improved error handling
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log("MongoDB connected successfully");
+    await initializeDoctors();
+    console.log("Default doctors initialized");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Exit process if DB connection fails
+  }
+};
+
+// Initialize default doctors with error handling
 const initializeDoctors = async () => {
   const defaultDoctors = [
     {
@@ -16,8 +52,7 @@ const initializeDoctors = async () => {
       name: "Dr. Sarah Jha - Cardiologist",
       specialization: "Cardiologist",
       location: "Sector 62",
-      image:
-        "https://t4.ftcdn.net/jpg/06/47/16/29/360_F_647162966_SFu8GP6awkeW0OnFnAxPjiGXSoeme4ht.jpg",
+      image: "https://t4.ftcdn.net/jpg/06/47/16/29/360_F_647162966_SFu8GP6awkeW0OnFnAxPjiGXSoeme4ht.jpg",
       rating: 4.8,
     },
     {
@@ -25,8 +60,7 @@ const initializeDoctors = async () => {
       name: "Dr. Sachin Maurya - Neurologist",
       specialization: "Neurologist",
       location: "Health Complex, Boston",
-      image:
-        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200",
+      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200",
       rating: 4.9,
     },
     {
@@ -34,52 +68,47 @@ const initializeDoctors = async () => {
       name: "Dr. Priya Verma - Pediatrician",
       specialization: "Pediatrician",
       location: "Children's Hospital, Chicago",
-      image:
-        "https://media.istockphoto.com/id/1293373291/photo/portrait-of-confident-ethnic-female-doctor.jpg?s=612x612&w=0&k=20&c=CJsw6IgTecJZoBeVXqZdvh2BI-NyVa-8VcQM3fPhbYc=",
+      image: "https://media.istockphoto.com/id/1293373291/photo/portrait-of-confident-ethnic-female-doctor.jpg?s=612x612&w=0&k=20&c=CJsw6IgTecJZoBeVXqZdvh2BI-NyVa-8VcQM3fPhbYc=",
       rating: 4.7,
     },
   ];
 
-  for (const doctor of defaultDoctors) {
-    const existingDoctor = await Doctorsreal.findById(doctor._id);
-
-    if (!existingDoctor) {
-      await Doctorsreal.create(doctor);
+  try {
+    for (const doctor of defaultDoctors) {
+      const existingDoctor = await Doctorsreal.findById(doctor._id);
+      if (!existingDoctor) {
+        await Doctorsreal.create(doctor);
+        console.log(`Created doctor: ${doctor.name}`);
+      }
     }
+  } catch (error) {
+    console.error("Error initializing doctors:", error);
   }
 };
 
-dotenv.config();
-const app = express();
-
-app.use(
-  cors({ 
-    origin: ["http://localhost:5181", "http://localhost:3000"],
-  })
-);
-app.use(express.json());
-
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(async () => {
-    console.log("MongoDB connected");
-    await initializeDoctors();
-    console.log("Doctors initialized");
-  })
-  .catch((err) => console.error("MongoDB connection error:", err));
-
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/appointments", appointmentRoutes);
 app.use("/api/doctorroutes", doctorPersonRoutes);
-app.use("/api/uploadpictur", checkmedicine);
+app.use("/api/uploadpicture", checkmedicine); // Fixed typo in route name
 
+// Global error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Server Error:", err.stack);
   res.status(500).json({
-    message: "Something went wrong!",
-    error: err.message,
+    success: false,
+    message: "Internal Server Error",
+    error: process.env.NODE_ENV === "development" ? err.message : undefined
   });
 });
 
+// Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const startServer = async () => {
+  await connectDB();
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+};
+
+startServer();
