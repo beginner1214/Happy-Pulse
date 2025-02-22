@@ -18,10 +18,10 @@ const app = express();
 const corsOptions = {
   origin: [
     process.env.FRONTEND_URL || "http://localhost:5181",
-    "http://localhost:3000" // Optional secondary URL
+    "http://localhost:3000", // Optional secondary URL
   ],
   credentials: true, // Enable if you need to send cookies
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 };
 
 // Middleware
@@ -33,7 +33,7 @@ const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
       useNewUrlParser: true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
     });
     console.log("MongoDB connected successfully");
     await initializeDoctors();
@@ -52,7 +52,8 @@ const initializeDoctors = async () => {
       name: "Dr. Sarah Jha - Cardiologist",
       specialization: "Cardiologist",
       location: "Sector 62",
-      image: "https://t4.ftcdn.net/jpg/06/47/16/29/360_F_647162966_SFu8GP6awkeW0OnFnAxPjiGXSoeme4ht.jpg",
+      image:
+        "https://t4.ftcdn.net/jpg/06/47/16/29/360_F_647162966_SFu8GP6awkeW0OnFnAxPjiGXSoeme4ht.jpg",
       rating: 4.8,
     },
     {
@@ -60,7 +61,8 @@ const initializeDoctors = async () => {
       name: "Dr. Sachin Maurya - Neurologist",
       specialization: "Neurologist",
       location: "Health Complex, Boston",
-      image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200",
+      image:
+        "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=200&h=200",
       rating: 4.9,
     },
     {
@@ -68,7 +70,8 @@ const initializeDoctors = async () => {
       name: "Dr. Priya Verma - Pediatrician",
       specialization: "Pediatrician",
       location: "Children's Hospital, Chicago",
-      image: "https://media.istockphoto.com/id/1293373291/photo/portrait-of-confident-ethnic-female-doctor.jpg?s=612x612&w=0&k=20&c=CJsw6IgTecJZoBeVXqZdvh2BI-NyVa-8VcQM3fPhbYc=",
+      image:
+        "https://media.istockphoto.com/id/1293373291/photo/portrait-of-confident-ethnic-female-doctor.jpg?s=612x612&w=0&k=20&c=CJsw6IgTecJZoBeVXqZdvh2BI-NyVa-8VcQM3fPhbYc=",
       rating: 4.7,
     },
   ];
@@ -98,10 +101,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({
     success: false,
     message: "Internal Server Error",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined
+    error: process.env.NODE_ENV === "development" ? err.message : undefined,
   });
 });
 
+app.get("/", (req, res) => {
+  res.send("hello world");
+});
 // Start server
 const PORT = process.env.PORT || 5000;
 const startServer = async () => {
