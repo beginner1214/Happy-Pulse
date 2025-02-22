@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "framework": "vite",
   "builds": [
     {
       "src": "dist/**",
@@ -22,7 +19,7 @@
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "dest": "https://happy-pulse-sigma.vercel.app/api/$1"
     },
     {
       "src": "/(.*)",
