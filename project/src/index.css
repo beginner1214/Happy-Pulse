@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-blue: #E3F2FD;
+  --secondary-blue: #90CAF9;
+  --light-grey: #F5F5F5;
+  --lavender: #E6E6FA;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  background-color: var(--light-grey);
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--lavender) 100%);
+}
